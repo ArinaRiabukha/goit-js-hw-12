@@ -55,6 +55,7 @@ body {
 .search-button:hover{
   background-color: #6c8cff; 
 }
+
 .gallery{
   display: flex;
   flex-wrap: wrap;
@@ -64,7 +65,6 @@ body {
   margin-top: 32px;
   margin-bottom: 32px;
 }
-
 .gallery-item{
   max-width: 360px;
 }
@@ -137,3 +137,25 @@ body {
 }
 
 @keyframes lineGrow {to{width: 100%;}}
+
+.load-button{
+  font-family: "Montserrat", sans-serif;
+  display: flex;
+  margin: 25px auto;
+  justify-content: center;
+  border-radius: 7px;
+  border: none;
+  padding: 8px 16px;
+  width: 125px;
+  height: 40px;
+  background-color: #4e75ff;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: #fff;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.load-button:hover{
+  background-color: #6c8cff; 
+}

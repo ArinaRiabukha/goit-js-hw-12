@@ -14,9 +14,15 @@ let Lightboxgallery = new SimpleLightbox('.gallery a', {
     captionDelay: 250
 });
 
+let currentPage = 1; 
+let currentSearch = "";
+let loadedImages = 0;
+
 const form = document.getElementById("search-form");
 const gallery = document.getElementById("gallery");
 const loader = document.querySelector(".loader");
+const loadBtn= document.querySelector(".load-button")
+loadBtn.style.display = "none";
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -33,11 +39,18 @@ form.addEventListener("submit", async (event) => {
         });
         return;
     }
+    currentSearch = searchTerm; 
+    currentPage = 1; 
+    loadedImages = 0;
+    gallery.innerHTML = ''; 
     loader.style.display = "block";
+    loadBtn.style.display = "none";
     try {
-        const data = await getPhotos(searchTerm);
+        const data = await getPhotos(searchTerm, currentPage);
+        const hits = data.hits;
+        const totalHits = data.totalHits;
 
-        if (!data.length) {
+        if (!hits.length) {
             iziToast.info({
                 title: '',
                 backgroundColor: '#EF4040',
@@ -46,8 +59,15 @@ form.addEventListener("submit", async (event) => {
                 position: 'topRight',
             });
         } else {
-            gallery.innerHTML = galleryMarkup(data);
+            loadedImages += hits.length;
+            gallery.innerHTML = galleryMarkup(hits);
             Lightboxgallery.refresh();
+
+            if (loadedImages < totalHits) {
+                loadBtn.style.display = "block"; 
+            } else {
+                loadBtn.style.display = "none";
+            }
         }
     } catch (error) {
         console.error("Error fetching data:", error);
@@ -59,6 +79,46 @@ form.addEventListener("submit", async (event) => {
             position: 'topRight',
         });
     }finally {
+        loader.style.display = "none";
+    }
+});
+
+loadBtn.addEventListener("click", async () => {
+    currentPage += 1;
+    loader.style.display = "block";
+
+    try {
+        const data = await getPhotos(currentSearch, currentPage);
+
+        if (data.hits.length) {
+            loadedImages += data.hits.length; 
+            gallery.innerHTML += galleryMarkup(data.hits);
+            Lightboxgallery.refresh();
+    
+                window.scrollBy({
+                    top: 570, 
+                    behavior: "smooth",
+                });
+
+            if (loadedImages >= data.totalHits) {
+                loadBtn.style.display = "none";
+                iziToast.info({
+                    message: 'We`re sorry, but you`ve reached the end of search results.',
+                    messageColor: '#FAFAFB',
+                    backgroundColor: '#91A9FF',
+                    position: 'topRight',
+                });
+            }
+        }
+    } catch (error) {
+        console.error("Error loading more photos:", error);
+        iziToast.error({
+            message: 'Failed to load more images. Please try again later.',
+            messageColor: '#FAFAFB',
+            backgroundColor: '#EF4040',
+            position: 'topRight',
+        });
+    } finally {
         loader.style.display = "none";
     }
 });
